@@ -38,7 +38,7 @@ our $debug = 1;
 
     if ($type eq 'IDFA') {
         $flags->{'regex'} = qr/^[A-Z0-9][A-Z0-9\-]+[A-Z0-9]$/;
-        $flags->{'uppercase'} = 1;
+        # $flags->{'uppercase'} = 1;
 
     } elsif ($type eq 'ADID') {
         $flags->{'regex'} = qr/^[a-z0-9][a-z0-9\-]+[a-z0-9]$/;

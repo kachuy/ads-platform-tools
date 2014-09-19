@@ -22,7 +22,7 @@ args = parser.parse_args()
 flags = {'uppercase': False, 'dropleadingzeros': False, 'dropleadingat': False }
 
 if args.type == 'IDFA':
-    flags['uppercase'] = True
+    # flags['uppercase'] = True
     flags['regex'] = re.compile('^[A-Z0-9][A-Z0-9\-]+[A-Z0-9]$')
 elif args.type == 'ADID':
     flags['regex'] = re.compile('^[a-z0-9][a-z0-9\-]+[a-z0-9]$')
