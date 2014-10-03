@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import csv
 import re
 import hashlib
 import sys
@@ -29,7 +30,7 @@ elif args.type == 'ADID':
 elif args.type == 'ANDROID':
     flags['regex'] = re.compile('^[a-z0-9]+$')
 elif args.type == 'EMAIL':
-    flags['regex'] = re.compile('^[a-z0-9][a-z0-9_\-\.]+\@[a-z0-9][a-z0-9\.]+[a-z]$')
+    flags['regex'] = re.compile('^[a-z0-9][a-z0-9_\-\.\+]+\@[a-z0-9][a-z0-9\.]+[a-z]$')
 elif args.type == 'PHONE' or args.type == 'TWITTERID':
     flags['dropleadingzeros'] = True
     flags['regex'] = re.compile('^\d+$')
@@ -43,38 +44,49 @@ else:
 skipped = 0
 written = 0
 
-while True:
-    line = args.infile.readline()
-    line = line.rstrip()
-    if not line: break
+if args.infile.name.endswith(".csv"):
+    csv_file = True
+    csv_file = open(args.infile.name, "rU")
+    reader = csv.reader(csv_file, dialect='excel')
+else:
+    csv_file = False
+    reader = args.infile
 
-    # Remove whitespace
-    line = ''.join(line.split())
+for text in reader:
+    if not csv_file:
+        text = [text.rstrip()]
 
-    # Set case
-    if flags['uppercase']:
-        line = line.upper()
-    else:
-        line = line.lower()
+    for line in text:
 
-    # Drop leading '@'
-    if flags['dropleadingat']:
-        line = line.lstrip('@')
+        if not line: break
 
-    # Drop leading zeros
-    if flags['dropleadingzeros']:
-        line = line.lstrip('0')
+        # Remove whitespace
+        line = ''.join(line.split())
 
-    if flags['regex'].match(line) is None:
-        skipped += 1
-        continue
+        # Set case
+        if flags['uppercase']:
+            line = line.upper()
+        else:
+            line = line.lower()
 
-    if debug:
-        print ("\t" + line)
+        # Drop leading '@'
+        if flags['dropleadingat']:
+            line = line.lstrip('@')
 
-    hashed = hashlib.sha256(line).hexdigest()
-    args.outfile.write(hashed + "\n")
-    written += 1
+        # Drop leading zeros
+        if flags['dropleadingzeros']:
+            line = line.lstrip('0')
+
+        if flags['regex'].match(line) is None:
+            skipped += 1
+            continue
+
+        if debug:
+            print ("\t" + line)
+
+        hashed = hashlib.sha256(line).hexdigest()
+        args.outfile.write(hashed + "\n")
+        written += 1
 
 args.infile.close()
 args.outfile.close()
