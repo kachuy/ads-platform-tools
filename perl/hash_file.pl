@@ -47,7 +47,7 @@ our $debug = 1;
         $flags->{'regex'} = qr/^[a-z0-9]+$/;
 
     } elsif ($type eq 'EMAIL') {
-        $flags->{'regex'} = qr/^[a-z0-9][a-z0-9_\-\.]+\@[a-z0-9][a-z0-9\.]+[a-z]$/;
+        $flags->{'regex'} = qr/^[a-z0-9][a-z0-9_\-\.\+]+\@[a-z0-9][a-z0-9\.]+[a-z]$/;
 
     } elsif ($type eq 'PHONE' || $type eq 'TWITTERID') {
         $flags->{'regex'} = qr/^\d+$/;
