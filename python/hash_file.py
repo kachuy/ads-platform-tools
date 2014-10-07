@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Hash the contents of a file for TA
 parser.add_argument('--type', required=True, choices=['IDFA', 'ADID', 'ANDROID', 'EMAIL', 'PHONE', 'TWITTERID', 'TWITTERSCREENNAME'], 
     metavar='TWITTERID', help='source data type.')
 
-parser.add_argument('--infile', required=True, type=argparse.FileType('r'), metavar='/path/to/source.txt', help='input file to parse.')
+parser.add_argument('--infile', required=True, type=argparse.FileType('rU'), metavar='/path/to/source.txt', help='input file to parse.')
 
 parser.add_argument('--outfile', required=True, type=argparse.FileType('w'), metavar='/path/to/output.txt', help='file to write output.')
 
@@ -46,19 +46,20 @@ written = 0
 
 if args.infile.name.endswith(".csv"):
     csv_file = True
-    csv_file = open(args.infile.name, "rU")
-    reader = csv.reader(csv_file, dialect='excel')
+    reader = csv.reader(args.infile, dialect='excel')
 else:
     csv_file = False
     reader = args.infile
 
 for text in reader:
     if not csv_file:
-        text = [text.rstrip()]
+        text = [text]
 
     for line in text:
 
         if not line: break
+
+        line = line.rstrip()
 
         # Remove whitespace
         line = ''.join(line.split())
