@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import csv
 import re
 import hashlib
 import sys
@@ -13,7 +14,7 @@ parser = argparse.ArgumentParser(description='Hash the contents of a file for TA
 parser.add_argument('--type', required=True, choices=['IDFA', 'ADID', 'ANDROID', 'EMAIL', 'PHONE', 'TWITTERID', 'TWITTERSCREENNAME'], 
     metavar='TWITTERID', help='source data type.')
 
-parser.add_argument('--infile', required=True, type=argparse.FileType('r'), metavar='/path/to/source.txt', help='input file to parse.')
+parser.add_argument('--infile', required=True, type=argparse.FileType('rU'), metavar='/path/to/source.txt', help='input file to parse.')
 
 parser.add_argument('--outfile', required=True, type=argparse.FileType('w'), metavar='/path/to/output.txt', help='file to write output.')
 
@@ -29,7 +30,7 @@ elif args.type == 'ADID':
 elif args.type == 'ANDROID':
     flags['regex'] = re.compile('^[a-z0-9]+$')
 elif args.type == 'EMAIL':
-    flags['regex'] = re.compile('^[a-z0-9][a-z0-9_\-\.]+\@[a-z0-9][a-z0-9\.]+[a-z]$')
+    flags['regex'] = re.compile('^[a-z0-9][a-z0-9_\-\.\+]+\@[a-z0-9][a-z0-9\.]+[a-z]$')
 elif args.type == 'PHONE' or args.type == 'TWITTERID':
     flags['dropleadingzeros'] = True
     flags['regex'] = re.compile('^\d+$')
@@ -43,38 +44,50 @@ else:
 skipped = 0
 written = 0
 
-while True:
-    line = args.infile.readline()
-    line = line.rstrip()
-    if not line: break
+if args.infile.name.endswith(".csv"):
+    csv_file = True
+    reader = csv.reader(args.infile, dialect='excel')
+else:
+    csv_file = False
+    reader = args.infile
 
-    # Remove whitespace
-    line = ''.join(line.split())
+for text in reader:
+    if not csv_file:
+        text = [text]
 
-    # Set case
-    if flags['uppercase']:
-        line = line.upper()
-    else:
-        line = line.lower()
+    for line in text:
 
-    # Drop leading '@'
-    if flags['dropleadingat']:
-        line = line.lstrip('@')
+        if not line: break
 
-    # Drop leading zeros
-    if flags['dropleadingzeros']:
-        line = line.lstrip('0')
+        line = line.rstrip()
 
-    if flags['regex'].match(line) is None:
-        skipped += 1
-        continue
+        # Remove whitespace
+        line = ''.join(line.split())
 
-    if debug:
-        print ("\t" + line)
+        # Set case
+        if flags['uppercase']:
+            line = line.upper()
+        else:
+            line = line.lower()
 
-    hashed = hashlib.sha256(line).hexdigest()
-    args.outfile.write(hashed + "\n")
-    written += 1
+        # Drop leading '@'
+        if flags['dropleadingat']:
+            line = line.lstrip('@')
+
+        # Drop leading zeros
+        if flags['dropleadingzeros']:
+            line = line.lstrip('0')
+
+        if flags['regex'].match(line) is None:
+            skipped += 1
+            continue
+
+        if debug:
+            print ("\t" + line)
+
+        hashed = hashlib.sha256(line).hexdigest()
+        args.outfile.write(hashed + "\n")
+        written += 1
 
 args.infile.close()
 args.outfile.close()
