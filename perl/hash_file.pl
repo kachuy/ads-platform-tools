@@ -36,8 +36,11 @@ our $debug = 1;
 
    my $flags = {};
 
-    if ($type eq 'IDFA') {
-        $flags->{'regex'} = qr/^[A-Z0-9][A-Z0-9\-]+[A-Z0-9]$/;
+    if ($type eq 'MOBILEDEVICEID') {
+        # mobile device IDs can be a mixture of IDFA, ADID and ANDROID in a single file
+        $flags->{'regex'} = qr/^[a-z0-9][a-z0-9\-]+[a-z0-9]$/;
+    } elsif ($type eq 'IDFA') {
+        $flags->{'regex'} = qr/^[a-z0-9][a-z0-9\-]+[a-z0-9]$/;
         # $flags->{'uppercase'} = 1;
 
     } elsif ($type eq 'ADID') {
