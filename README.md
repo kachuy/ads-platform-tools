@@ -4,7 +4,7 @@ Tools and utilities for the Twitter Ads Platform.
 
 ## hash_file
 
-Sample tools to hash data for tailored audience uploads, in either `Python` or `Perl`.
+Sample tools to hash data for tailored audience uploads, in either `Python` or `Perl`. Details on these normalization rules can be found [here (public access)](https://support.twitter.com/articles/20172017-tailored-audiences) or [here](https://dev.twitter.com/ads/audiences/file-data) (restricted access).
 
 Data types supported:
  - MOBILEDEVICEID
