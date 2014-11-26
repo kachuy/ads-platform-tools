@@ -18,7 +18,7 @@ Data types supported:
 
 
 Usage (Python):
-`./hash_file.py --file EMAIL --infile /data/source_email_list.txt --outfile /data/hashed_email_list.txt`
+`./hash_file.py --type EMAIL --infile /data/source_email_list.txt --outfile /data/hashed_email_list.txt`
 
 Usage (Perl):
 `./hash_file.pl EMAIL /data/source_email_list.txt`
