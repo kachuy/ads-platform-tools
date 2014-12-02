@@ -9,7 +9,7 @@ import yaml
 
 __version__ = "0.2"
 
-KEY_FILE = "ads_hmac_keys.yml.bak"
+KEY_FILE = "mact_keys.yml"
 # KEY_FILE is a YAML file with two keys at the top level: production_base64 and development_base64. 
 # each represents the base64 encoded HMAC key used for that environment
 
