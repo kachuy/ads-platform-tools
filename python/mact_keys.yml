@@ -1,3 +1,4 @@
+# sample keys file, replace values with those provided by Twitter
 production_base64: "cHJvZHVjdGlvbg=="
 development_base64: "ZGV2ZWxvcG1lbnQ="
 
