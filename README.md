@@ -1,6 +1,8 @@
 # ads-platform-tools
 
-Tools and utilities for the Twitter Ads Platform.
+Tools and utilities for the Twitter Ads Platform. 
+
+Also useful, see https://github.com/twitterdev/ton-upload for using the TON API.
 
 ## hash_tailored_audience_file
 
