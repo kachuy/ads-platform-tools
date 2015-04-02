@@ -30,7 +30,7 @@ def main(options):
   start = time.clock()
   user_twurl = twurlauth()
 
-  print "Best practices stats check for :account_id %s" % account
+  print("Best practices stats check for :account_id %s" % account)
   linesep()
 
   now = datetime.datetime.utcnow()
@@ -39,9 +39,9 @@ def main(options):
   end_time = datetime.datetime.utcnow()
   end_time = end_time.replace(minute=0, second=0, microsecond=0)
   end_time -= datetime.timedelta(seconds=1)
-  print 'Current time:\t%s' % now
-  print 'Start time:\t%s' % start_time
-  print 'End time:\t%s' % end_time
+  print('Current time:\t%s' % now)
+  print('Start time:\t%s' % start_time)
+  print('End time:\t%s' % end_time)
   linesep()
 
   # check that we have access to this :account_id
@@ -57,43 +57,43 @@ def main(options):
   data = get_data(user_twurl, 'GET', headers, DOMAIN + resource_path)
 
   # filter funding instruments
-  print "Pre-filtered data:\t\t%s" % len(data)
+  print("Pre-filtered data:\t\t%s" % len(data))
   funding_instruments = check(data, start_time, end_time)
-  print "Funding instruments:\t\t%s" % len(funding_instruments)
+  print("Funding instruments:\t\t%s" % len(funding_instruments))
 
   # fetch campaigns
   resource_path = '/0/accounts/%s/campaigns?with_deleted=true&count=1000' % account
   data = get_data(user_twurl, 'GET', headers, DOMAIN + resource_path)
   
   # filter campaigns
-  print "Pre-filtered data:\t\t%s" % len(data)
+  print("Pre-filtered data:\t\t%s" % len(data))
   campaigns = check(data, start_time, end_time, 'funding_instrument_id', funding_instruments)
-  print "Campaigns:\t\t\t%s" % len(campaigns)
+  print("Campaigns:\t\t\t%s" % len(campaigns))
   
   # fetch line items
   resource_path = '/0/accounts/%s/line_items?with_deleted=true&count=1000' % account
   data = get_data(user_twurl, 'GET', headers, DOMAIN + resource_path)
   
   # filter line items
-  print "Pre-filtered data:\t\t%s" % len(data)
+  print("Pre-filtered data:\t\t%s" % len(data))
   line_items = check(data, start_time, end_time, 'campaign_id', campaigns)
-  print "Line items:\t\t\t%s" % len(line_items)
+  print("Line items:\t\t\t%s" % len(line_items))
   
   # fetch promoted_tweets
   resource_path = '/0/accounts/%s/promoted_tweets?with_deleted=true&count=1000' % account
   data = get_data(user_twurl, 'GET', headers, DOMAIN + resource_path)
   
   # filter promoted_tweets
-  print "Pre-filtered data:\t\t%s" % len(data)
+  print("Pre-filtered data:\t\t%s" % len(data))
   promoted_tweets = check(data, start_time, end_time, 'line_item_id', line_items)
-  print "Promoted Tweets:\t\t%s" % len(promoted_tweets)
+  print("Promoted Tweets:\t\t%s" % len(promoted_tweets))
 
   total_query_count = 0
   total_request_cost = 0
   total_rate_limited_query_count = 0
 
   if len(line_items) > 0:
-    print "\tfetching stats for %s line items" % len(line_items)
+    print("\tfetching stats for %s line items" % len(line_items))
     (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account, 'line_items', 
                                                                        start_time, end_time, line_items)
 
@@ -101,7 +101,7 @@ def main(options):
     total_request_cost += cost_total
 
   if len(promoted_tweets) > 0:
-    print "\tfetching stats for %s promoted tweets" % len(promoted_tweets)
+    print("\tfetching stats for %s promoted tweets" % len(promoted_tweets))
     (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account, 'promoted_tweets', 
                                                                        start_time, end_time, promoted_tweets)
 
@@ -110,13 +110,13 @@ def main(options):
     total_rate_limited_query_count += rate_limited_query_count
 
   linesep()
-  print "Total Stats Queries:\t\t%s" % total_query_count
-  print "Total Stats Request Cost:\t%s" % total_request_cost
-  print "Queries Rate Limited:\t\t%s" % total_rate_limited_query_count
+  print("Total Stats Queries:\t\t%s" % total_query_count)
+  print("Total Stats Request Cost:\t%s" % total_request_cost)
+  print("Queries Rate Limited:\t\t%s" % total_rate_limited_query_count)
   linesep()
 
   elapsed = (time.clock() - start)
-  print 'Time elapsed:\t\t\t%s' % elapsed
+  print('Time elapsed:\t\t\t%s' % elapsed)
 
 def input(): 
   p = argparse.ArgumentParser(description='Fetch Twitter Ads Account Stats')
@@ -171,6 +171,10 @@ def get_data(user_twurl, http_method, headers, url):
   data = []
 
   res_headers, response = request(user_twurl, http_method, headers, url)
+
+  if res_headers['status'] != '200':
+    print('ERROR: query failed, cannot continue: %s' % url)
+    sys.exit(0)
 
   if response and 'data' in response:
     data += response['data']
@@ -227,17 +231,16 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
         print('Stats Query:\t%s' % stats_url)
 
     elif res_headers['status'] == '429':
-      print "RATE LIMITED! adding entities back to queue"
+      print("RATE LIMITED! adding entities back to queue")
       rate_limited_query_count += 1
       entities.extend(query_entities)
     elif res_headers['status'] == '503':
-      print "TIMEOUT!"
-      print stats_url
-      print res_headers
+      print("TIMEOUT!")
+      print(stats_url)
       entities.extend(query_entities)
     else:
-      print "ERROR %s" % res_headers['status']
-      print res_headers
+      print("ERROR %s" % res_headers['status'])
+      print(res_headers)
       sys.exit(0)
 
   return query_count, cost_total, rate_limited_query_count
@@ -267,7 +270,7 @@ def format_timestamp(timestamp):
   return datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')
 
 def linesep():
-  print '-----------------------------------------------'
+  print('-----------------------------------------------')
 
 if __name__=='__main__':
   options = input()
