@@ -30,3 +30,9 @@ Sample script to debug the HMAC hashing of MACT device_ids. Input is a single, u
 Usage (Python):
 `./hash_mact_device.py --env prod --value abc123456789`
 
+## fetch_stats
+
+Sample script implementing [best practices](https://dev.twitter.com/ads/campaigns/analytics-best-practices) for pulling ads analytics for an advertiser account.
+
+Usage (Python):
+`./fetch_stats.py -a abc1`
