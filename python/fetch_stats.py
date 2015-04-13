@@ -251,9 +251,7 @@ def check(data, start_time, end_time, filter_field=None, filter_data=[]):
 
   if data and len(data) > 0:
     for i in data:
-      if 'servable' in i and i['servable'] == False:
-        continue
-      elif 'end_time' in i and i['end_time'] and format_timestamp(i['end_time']) < start_time:
+      if 'end_time' in i and i['end_time'] and format_timestamp(i['end_time']) < start_time:
         continue
       elif 'start_time' in i and i['start_time'] and format_timestamp(i['start_time']) > end_time:
         continue
