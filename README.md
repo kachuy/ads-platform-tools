@@ -51,7 +51,7 @@ Params:
 Sample output:
 
 ```
-./fetch_stats.py -a abc1 -s
+./fetch_stats.py -a abc1
 Best practices stats check for :account_id abc1
 -----------------------------------------------
 Current time:   2015-04-16 02:32:16.815510
