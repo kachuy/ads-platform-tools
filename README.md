@@ -54,29 +54,24 @@ Sample output:
 ./fetch_stats.py -a abc1 -s
 Best practices stats check for :account_id abc1
 -----------------------------------------------
-Current time:   2015-04-16 01:27:44.136085
-Start time: 2015-04-09 01:00:00
-End time:   2015-04-16 00:59:59
+Current time:   2015-04-16 02:32:16.815510
+Start time:     2015-04-09 02:00:00
+End time:       2015-04-16 01:59:59
 -----------------------------------------------
-Pre-filtered data:          22
-Funding instruments:        2
-Pre-filtered data:          1710
-Campaigns:                  171
-Pre-filtered data:          1631
-Line items:                 169
-Pre-filtered data:          1870
-Promoted Tweets:            169
-    fetching stats for 169 line items
-    fetching stats for 169 promoted tweets
-    fetching segmentation stats for 169 line items
-    fetching segmentation stats for 169 promoted tweets
+Pre-filtered data:          2
+Funding instruments:        1
+Pre-filtered data:          15381
+Campaigns:                  67
+Pre-filtered data:          14768
+Line items:                 37
+Pre-filtered data:          11518
+Promoted Tweets:            33
+    fetching stats for 37 line items
+    fetching stats for 33 promoted tweets
 -----------------------------------------------
-Non-Seg Stats Req Cost:     12160
-Segmented Stats Req Cost:   62500
------------------------------------------------
-Total Stats Queries:        108
-Total Stats Request Cost:   74660
+Total Stats Queries:        4
+Total Stats Request Cost:   2780
 Queries Rate Limited:       0
 -----------------------------------------------
-Time elapsed:           20.583211
+Time elapsed:           11.44861
 ```
