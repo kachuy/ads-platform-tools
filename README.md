@@ -4,6 +4,12 @@ Tools and utilities for the Twitter Ads Platform.
 
 Also useful, see https://github.com/twitterdev/ton-upload for using the TON API.
 
+Before using any of the Python tools/utilities be sure to do:
+
+```bash
+pip install -r python/requirements.pip
+```
+
 ## hash_tailored_audience_file
 
 Sample tools to hash data for tailored audience uploads, in either `Python` or `Perl`. Details on these normalization rules can be found [here (public access)](https://support.twitter.com/articles/20172017-tailored-audiences) or [here](https://dev.twitter.com/ads/audiences/file-data) (restricted access).
