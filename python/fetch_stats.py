@@ -275,7 +275,7 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
     if res_headers['status'] == '200':
       query_count += 1
 
-      if VERBOSE == 2:
+      if VERBOSE > 1:
         print('VERBOSE:\tStats Query:\t%s' % stats_url)
 
     elif res_headers['status'] == '429':
