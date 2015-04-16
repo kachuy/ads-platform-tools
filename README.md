@@ -38,3 +38,40 @@ Sample script implementing [best practices](https://dev.twitter.com/ads/campaign
 
 Usage (Python):
 `./fetch_stats.py -a abc1`
+
+Params:
+
+```
+-a abc1   # the :account_id to run the stats fetcher on
+-s        # pull segmented stats
+-v        # output avg query costs
+-vv       # output stats API calls made
+```
+
+Sample output:
+
+```
+./fetch_stats.py -a abc1
+Best practices stats check for :account_id abc1
+-----------------------------------------------
+Current time:   2015-04-16 02:32:16.815510
+Start time:     2015-04-09 02:00:00
+End time:       2015-04-16 01:59:59
+-----------------------------------------------
+Pre-filtered data:          2
+Funding instruments:        1
+Pre-filtered data:          15381
+Campaigns:                  67
+Pre-filtered data:          14768
+Line items:                 37
+Pre-filtered data:          11518
+Promoted Tweets:            33
+    fetching stats for 37 line items
+    fetching stats for 33 promoted tweets
+-----------------------------------------------
+Total Stats Queries:        4
+Total Stats Request Cost:   2780
+Queries Rate Limited:       0
+-----------------------------------------------
+Time elapsed:           11.44861
+```
