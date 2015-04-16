@@ -16,17 +16,20 @@ import sys
 
 DOMAIN = 'https://ads-api.twitter.com'
 MOCK_RATE_LIMITING = False
-VERBOSE = False
+VERBOSE = 0
+NON_SUB_PARAM_SEGMENTATION_TYPES = ['PLATFORMS', 'LOCATIONS', 'GENDER', 'INTERESTS', 'KEYWORDS']
 
 def main(options):
+  global VERBOSE
+  global MOCK_RATE_LIMITING
   account = options.account_id
   headers = options.headers
   if options.mock_limiting == True:
-    global MOCK_RATE_LIMITING
     MOCK_RATE_LIMITING = options.mock_limiting
-  if options.verbose == True:
-    global VERBOSE
-    VERBOSE = True
+  if options.veryverbose == True:
+    VERBOSE = 2
+  elif options.verbose == True:
+    VERBOSE = 1
   start = time.clock()
   user_twurl = twurlauth()
 
@@ -91,6 +94,8 @@ def main(options):
   total_query_count = 0
   total_request_cost = 0
   total_rate_limited_query_count = 0
+  segmented_query_count = 0
+  segmented_request_cost = 0
 
   if len(line_items) > 0:
     print("\tfetching stats for %s line items" % len(line_items))
@@ -109,9 +114,45 @@ def main(options):
     total_request_cost += cost_total
     total_rate_limited_query_count += rate_limited_query_count
 
+  # Segmentation queries
+  if options.segmentation == True:
+    if len(line_items) > 0:
+      print("\tfetching segmentation stats for %s line items" % len(line_items))
+      for i in NON_SUB_PARAM_SEGMENTATION_TYPES:
+        (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account, 
+                                                                           'line_items', start_time, end_time, 
+                                                                           line_items, i)
+
+        total_query_count += query_count
+        total_request_cost += cost_total
+        segmented_query_count += query_count
+        segmented_request_cost += cost_total
+
+    if len(promoted_tweets) > 0:
+      print("\tfetching segmentation stats for %s promoted tweets" % len(promoted_tweets))
+      for i in NON_SUB_PARAM_SEGMENTATION_TYPES:
+        (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account, 
+                                                                           'promoted_tweets', start_time, 
+                                                                           end_time, promoted_tweets, i)
+
+        total_query_count += query_count
+        total_request_cost += cost_total
+        segmented_query_count += query_count
+        segmented_request_cost += cost_total
+
   linesep()
+  if options.segmentation:
+    print("Non-Seg Stats Req Cost:\t\t%s" % (total_request_cost - segmented_request_cost))
+    print("Segmented Stats Req Cost:\t%s" % segmented_request_cost)
+    if VERBOSE > 0:
+      print("Avg Cost per Non-Seg Query:\t%s" % str((total_request_cost - segmented_request_cost ) / \
+            (total_query_count - segmented_query_count)))
+      print("Avg Cost per Segmented Query:\t%s" % str(segmented_request_cost / segmented_query_count))
+    linesep()
   print("Total Stats Queries:\t\t%s" % total_query_count)
   print("Total Stats Request Cost:\t%s" % total_request_cost)
+  if VERBOSE > 0:
+    print("Avg Cost per Query:\t\t%s" % str(total_request_cost / total_query_count))
   print("Queries Rate Limited:\t\t%s" % total_rate_limited_query_count)
   linesep()
 
@@ -125,7 +166,11 @@ def input():
   p.add_argument('-A', '--header', dest='headers', action='append', help='HTTP headers to include')
   p.add_argument('-m', '--mock-rate-limiting', dest='mock_limiting', action='store_true',
                  help='Mock rate limiting when remaining limit zero')
-  p.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
+  p.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Verbose outputs cost avgs')
+  p.add_argument('-vv', '--very-verbose', dest='veryverbose', action='store_true', 
+                 help='Very verbose outputs API queries made')
+  p.add_argument('-s', '--segmentation', dest='segmentation', help='Pull segmentation stats',
+                 action='store_true')
 
   args = p.parse_args()
 
@@ -188,11 +233,14 @@ def get_data(user_twurl, http_method, headers, url):
 
   return data
 
-def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_time, entities):
+def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_time, input_entities, segmentation=None):
 
+  entities = list(input_entities)
   resource_url = DOMAIN + "/0/stats/accounts/%s/%s" % (account_id, entity_type)
   query_params = '?granularity=HOUR&start_time=%sZ&end_time=%sZ' % (start_time.isoformat(), end_time.isoformat())
   query_param_entity_name = re.sub(r's$', '_ids', entity_type)
+  if segmentation:
+    query_params += '&segmentation_type=%s' % segmentation
 
   query_count = 0
   cost_total = 0
@@ -227,8 +275,8 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
     if res_headers['status'] == '200':
       query_count += 1
 
-      if VERBOSE == True:
-        print('Stats Query:\t%s' % stats_url)
+      if VERBOSE == 2:
+        print('VERBOSE:\tStats Query:\t%s' % stats_url)
 
     elif res_headers['status'] == '429':
       print("RATE LIMITED! adding entities back to queue")
@@ -242,6 +290,11 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
       print("ERROR %s" % res_headers['status'])
       print(res_headers)
       sys.exit(0)
+
+  if VERBOSE > 0:
+    if segmentation:
+      print('VERBOSE:\tSegmentation type:\t%s' % segmentation)
+    print('VERBOSE:\tAvg cost per query:\t%s' % str(cost_total / query_count))
 
   return query_count, cost_total, rate_limited_query_count
 
