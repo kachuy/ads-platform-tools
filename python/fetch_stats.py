@@ -15,17 +15,13 @@ import sys
 
 
 DOMAIN = 'https://ads-api.twitter.com'
-MOCK_RATE_LIMITING = False
 VERBOSE = 0
 NON_SUB_PARAM_SEGMENTATION_TYPES = ['PLATFORMS', 'LOCATIONS', 'GENDER', 'INTERESTS', 'KEYWORDS']
 
 def main(options):
   global VERBOSE
-  global MOCK_RATE_LIMITING
   account = options.account_id
   headers = options.headers
-  if options.mock_limiting == True:
-    MOCK_RATE_LIMITING = options.mock_limiting
   if options.veryverbose == True:
     VERBOSE = 2
   elif options.verbose == True:
@@ -164,8 +160,6 @@ def input():
 
   p.add_argument('-a', '--account', required=True, dest='account_id', help='Ads Account ID')
   p.add_argument('-A', '--header', dest='headers', action='append', help='HTTP headers to include')
-  p.add_argument('-m', '--mock-rate-limiting', dest='mock_limiting', action='store_true',
-                 help='Mock rate limiting when remaining limit zero')
   p.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Verbose outputs cost avgs')
   p.add_argument('-vv', '--very-verbose', dest='veryverbose', action='store_true', 
                  help='Very verbose outputs API queries made')
@@ -209,7 +203,10 @@ def request(user_twurl, http_method, headers, url):
 
   response, content = client.request(url, method = http_method, headers = header_list)
 
-  data = json.loads(content)
+  try:
+    data = json.loads(content)
+  except:
+    data = None
   return response, data
 
 def get_data(user_twurl, http_method, headers, url):
@@ -248,7 +245,7 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
   rate_limit_exceeded_sleep_in_sec = 0
 
   while entities:
-    if MOCK_RATE_LIMITING == True and rate_limit_exceeded_sleep_in_sec > 0:
+    if rate_limit_exceeded_sleep_in_sec > 0:
       print('\t! sleeping for %s' % rate_limit_exceeded_sleep_in_sec)
       time.sleep(rate_limit_exceeded_sleep_in_sec)
       rate_limit_exceeded_sleep_in_sec = 0
@@ -269,7 +266,7 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
       cost_total += int(res_headers['x-request-cost'])
 
       if ('x-cost-rate-limit-remaining' in res_headers and 
-          int(res_headers['x-cost-rate-limit-remaining']) == 0) or res_headers['status'] == '429':
+          int(res_headers['x-cost-rate-limit-remaining']) == 0) and res_headers['status'] == '429':
         rate_limit_exceeded_sleep_in_sec = int(res_headers['x-cost-rate-limit-reset']) - int(time.time())
 
     if res_headers['status'] == '200':
