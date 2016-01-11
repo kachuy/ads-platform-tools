@@ -96,16 +96,20 @@ def main(options):
 
     if len(line_items) > 0:
         print("\tfetching stats for %s line items" % len(line_items))
-        (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account, 'line_items',
-                                                                                                                                             start_time, end_time, line_items)
+        (query_count,
+         cost_total,
+         rate_limited_query_count) = gather_stats(user_twurl, headers, account, 'line_items',
+                                                  start_time, end_time, line_items)
 
         total_query_count += query_count
         total_request_cost += cost_total
 
     if len(promoted_tweets) > 0:
         print("\tfetching stats for %s promoted tweets" % len(promoted_tweets))
-        (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account, 'promoted_tweets',
-                                                                                                                                             start_time, end_time, promoted_tweets)
+        (query_count,
+         cost_total,
+         rate_limited_query_count) = gather_stats(user_twurl, headers, account, 'promoted_tweets',
+                                                  start_time, end_time, promoted_tweets)
 
         total_query_count += query_count
         total_request_cost += cost_total
@@ -116,9 +120,11 @@ def main(options):
         if len(line_items) > 0:
             print("\tfetching segmentation stats for %s line items" % len(line_items))
             for i in NON_SUB_PARAM_SEGMENTATION_TYPES:
-                (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account,
-                                                                                                                                                     'line_items', start_time, end_time,
-                                                                                                                                                     line_items, i)
+                (query_count,
+                 cost_total,
+                 rate_limited_query_count) = gather_stats(user_twurl, headers, account,
+                                                          'line_items', start_time, end_time,
+                                                          line_items, i)
 
                 total_query_count += query_count
                 total_request_cost += cost_total
@@ -128,9 +134,11 @@ def main(options):
         if len(promoted_tweets) > 0:
             print("\tfetching segmentation stats for %s promoted tweets" % len(promoted_tweets))
             for i in NON_SUB_PARAM_SEGMENTATION_TYPES:
-                (query_count, cost_total, rate_limited_query_count) = gather_stats(user_twurl, headers, account,
-                                                                                                                                                     'promoted_tweets', start_time,
-                                                                                                                                                     end_time, promoted_tweets, i)
+                (query_count,
+                 cost_total,
+                 rate_limited_query_count) = gather_stats(user_twurl, headers, account,
+                                                          'promoted_tweets', start_time, end_time,
+                                                          promoted_tweets, i)
 
                 total_query_count += query_count
                 total_request_cost += cost_total
@@ -141,10 +149,6 @@ def main(options):
     if options.segmentation:
         print("Non-Seg Stats Req Cost:\t\t%s" % (total_request_cost - segmented_request_cost))
         print("Segmented Stats Req Cost:\t%s" % segmented_request_cost)
-        if VERBOSE > 0:
-            print("Avg Cost per Non-Seg Query:\t%s" % str((total_request_cost - segmented_request_cost) / \
-                        (total_query_count - segmented_query_count)))
-            print("Avg Cost per Segmented Query:\t%s" % str(segmented_request_cost / segmented_query_count))
         linesep()
     print("Total Stats Queries:\t\t%s" % total_query_count)
     print("Total Stats Request Cost:\t%s" % total_request_cost)
@@ -161,12 +165,14 @@ def input():
     p = argparse.ArgumentParser(description='Fetch Twitter Ads Account Stats')
 
     p.add_argument('-a', '--account', required=True, dest='account_id', help='Ads Account ID')
-    p.add_argument('-A', '--header', dest='headers', action='append', help='HTTP headers to include')
-    p.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Verbose outputs cost avgs')
+    p.add_argument('-A', '--header', dest='headers', action='append',
+                   help='HTTP headers to include')
+    p.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                   help='Verbose outputs cost avgs')
     p.add_argument('-vv', '--very-verbose', dest='veryverbose', action='store_true',
-                                 help='Very verbose outputs API queries made')
+                   help='Very verbose outputs API queries made')
     p.add_argument('-s', '--segmentation', dest='segmentation', help='Pull segmentation stats',
-                                 action='store_true')
+                   action='store_true')
 
     args = p.parse_args()
 
@@ -236,11 +242,13 @@ def get_data(user_twurl, http_method, headers, url):
     return data
 
 
-def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_time, input_entities, segmentation=None):
+def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_time, input_entities,
+                 segmentation=None):
 
     entities = list(input_entities)
     resource_url = DOMAIN + "/0/stats/accounts/%s/%s" % (account_id, entity_type)
-    query_params = '?granularity=HOUR&start_time=%sZ&end_time=%sZ' % (start_time.isoformat(), end_time.isoformat())
+    param_data = (start_time.isoformat(), end_time.isoformat())
+    query_params = '?granularity=HOUR&start_time=%sZ&end_time=%sZ' % param_data
     query_param_entity_name = re.sub(r's$', '_ids', entity_type)
     if segmentation:
         query_params += '&segmentation_type=%s' % segmentation
@@ -248,13 +256,13 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
     query_count = 0
     cost_total = 0
     rate_limited_query_count = 0
-    rate_limit_exceeded_sleep_in_sec = 0
+    limit_exceeded_sleep = 0
 
     while entities:
-        if rate_limit_exceeded_sleep_in_sec > 0:
-            print('\t! sleeping for %s' % rate_limit_exceeded_sleep_in_sec)
-            time.sleep(rate_limit_exceeded_sleep_in_sec)
-            rate_limit_exceeded_sleep_in_sec = 0
+        if limit_exceeded_sleep > 0:
+            print('\t! sleeping for %s' % limit_exceeded_sleep)
+            time.sleep(limit_exceeded_sleep)
+            limit_exceeded_sleep = 0
 
         query_entities = []
         limit = 20
@@ -264,16 +272,19 @@ def gather_stats(user_twurl, headers, account_id, entity_type, start_time, end_t
         for _ in range(limit):
             query_entities.append(entities.pop(0))
 
-        stats_url = resource_url + query_params + '&%s=%s' % (query_param_entity_name, ','.join(query_entities))
+        url_entites = '&%s=%s' % (query_param_entity_name, ','.join(query_entities))
+        stats_url = resource_url + query_params + url_entites
 
         res_headers, res_data = request(user_twurl, 'GET', headers, stats_url)
 
         if 'x-request-cost' in res_headers:
             cost_total += int(res_headers['x-request-cost'])
+            reset_at = int(res_headers['x-cost-rate-limit-reset'])
 
-            if ('x-cost-rate-limit-remaining' in res_headers and
-                    int(res_headers['x-cost-rate-limit-remaining']) == 0) and res_headers['status'] == '429':
-                rate_limit_exceeded_sleep_in_sec = int(res_headers['x-cost-rate-limit-reset']) - int(time.time())
+            if (('x-cost-rate-limit-remaining' in res_headers and
+                    int(res_headers['x-cost-rate-limit-remaining']) == 0) and
+                    res_headers['status'] == '429'):
+                limit_exceeded_sleep = reset_at - int(time.time())
 
         if res_headers['status'] == '200':
             query_count += 1
@@ -310,7 +321,8 @@ def check(data, start_time, end_time, filter_field=None, filter_data=[]):
         for i in data:
             if 'end_time' in i and i['end_time'] and format_timestamp(i['end_time']) < start_time:
                 continue
-            elif 'start_time' in i and i['start_time'] and format_timestamp(i['start_time']) > end_time:
+            elif ('start_time' in i and i['start_time'] and
+                  format_timestamp(i['start_time']) > end_time):
                 continue
             elif i['deleted'] and format_timestamp(i['updated_at']) < start_time:
                 continue
