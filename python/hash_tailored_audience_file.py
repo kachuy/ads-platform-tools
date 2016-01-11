@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- Copyright (C) 2014 Twitter Inc and other contributors.
+ Copyright (C) 2014-2016 Twitter Inc and other contributors.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -62,9 +62,9 @@ def setup(args, flags):
         print ("ERROR: invalid type")
         return False
 
-
     # Flags should be correctly set if so return a true value
     return True
+
 
 def hashFile(args, flags):
     """Hashes the file based on the params setup in args.
@@ -93,7 +93,8 @@ def hashFile(args, flags):
 
         for line in text:
 
-            if not line: break
+            if not line:
+                break
 
             line = line.rstrip()
 
@@ -136,26 +137,37 @@ if __name__ == "__main__":
         debug = False
         parser = argparse.ArgumentParser(description='Hash the contents of a file for TA upload.')
 
+        aud_types = ['MOBILEDEVICEID',
+                     'IDFA',
+                     'ADID',
+                     'ANDROID',
+                     'EMAIL',
+                     'PHONE',
+                     'TWITTERID',
+                     'TWITTERSCREENNAME']
+
         # Set the type.
         parser.add_argument('--type', required=True, metavar='TWITTERID', help='source data type.',
-            choices=['MOBILEDEVICEID', 'IDFA', 'ADID', 'ANDROID', 'EMAIL', 'PHONE', 'TWITTERID', 'TWITTERSCREENNAME'])
+                            choices=aud_types)
 
         # parse --infile e.g. the in location of the file.
-        parser.add_argument('--infile', required=True, type=argparse.FileType('rU'), metavar='/path/to/source.txt', help='input file to parse.')
+        parser.add_argument('--infile', required=True, type=argparse.FileType('rU'),
+                            metavar='/path/to/source.txt', help='input file to parse.')
 
         # parse --outfile e.g. the location of the file
-        parser.add_argument('--outfile', required=True, type=argparse.FileType('w'), metavar='/path/to/output.txt', help='file to write output.')
+        parser.add_argument('--outfile', required=True, type=argparse.FileType('w'),
+                            metavar='/path/to/output.txt', help='file to write output.')
 
         # Parse the arguments from the command to the variable args.
         args = parser.parse_args()
 
         # Setup a dictionary with Flags
-        flags = {'uppercase': False, 'dropleadingzeros': False, 'dropleadingat': False }
+        flags = {'uppercase': False, 'dropleadingzeros': False, 'dropleadingat': False}
 
         # If setup is correctly configured..
-        if setup(args,flags) == True:
+        if setup(args, flags) is True:
             # Run the hashFile function with the variables
-            hashed_info = hashFile(args,flags)
+            hashed_info = hashFile(args, flags)
             print ("Written:\t" + str(hashed_info['written']))
             print ("Skipped:\t" + str(hashed_info['skipped']))
 
